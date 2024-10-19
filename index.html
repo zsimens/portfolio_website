@@ -16,10 +16,18 @@
         </label>
         <div>
           <label for="repos">Repositories</label>
-          <select id="repos" name="repos">
-            <option value="github" href="https://github.com/zsimens"><a href="https://github.com/zsimens" target="_blank">GitHub</a></option>
-            <option value="gitlab" href="https://gitlab.com/zsimens"><a href="https://gitlab.com/zsimens" target="_blank">GitLab</a></option>
+          <select id="repos" name="repos" onchange="openLink(this.value)">
+            <option value="">Select</option>
+            <option value="https://github.com/zsimens">GitHub</a></option>
+            <option value="https://gitlab.com/zsimens">GitLab</a></option>
           </select>
+          <script>
+            function openLink(url) {
+              if (url) {
+                window.open(url, '_blank');
+              }
+            }
+          </script>
         </div>
           <a href="/about.html">About</a>
           <a href="/projects.html" target="_blank">Projects</a>
