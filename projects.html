@@ -1,64 +1,147 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>Utility Vouchers</title>
-    <link rel="icon" type="image/x-icon" href="/images/favicons/zs_cursive_orange.ico">
-  </head>
-  <body>
-    <h1>Projects</h1>
-    <h2>Project Descriptions</h2>
-    <div>
-      <h2>Inflation and Wages Over Time</h2>
-      <a href="/inflation_over_time.html">link to IWOT</a>
-    <div>
-      <h2>Scrumptious</h2>
-      <a href="https://zsimens.github.io/recipe-web-pages/detail.html">link to Scrumptious</a>
-    </div>
-    <div>
-      <h2>Conference Go!</h2>
-      <a href="/conference_go.html">link to Conference Go!</a>
-    </div>
-    <div>
-      <h2>CarCar</h2>
-      <a href="/carcar.html">link to CarCar</a>
-    </div>
-    <div>
-      <h2>PostPUMP!</h2>
-      <a href="https://www.postpump.fit" target="_blank">link to PostPUMP</a>
-    </div>
-    <div>
-      <h2>Finca LaBrusca</h2>
-      <a href="https://www.fincalabrusca.site" target="_blank">link to FLB site</a>
-    </div>
-    <footer>
-      <h5>&copy 2024 Zachary Simens</h5>
-    </footer>
-      <!-- === DATADOG RUM (Real User Monitoring) === -->
-<script>
-  (function(h,o,u,n,d) {
-    h=h[d]=h[d]||{q:[],onReady:function(c){h.q.push(c)}}
-    d=o.createElement(u);d.async=1;d.src=n
-    n=o.getElementsByTagName(u)[0];n.parentNode.insertBefore(d,n)
-  })(window,document,'script','https://www.datadoghq-browser-agent.com/us1/v6/datadog-rum.js','DD_RUM')
-</script>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Projects | Zach Simens</title>
+  <link rel="icon" type="image/x-icon" href="/images/favicons/zs_cursive_orange.ico">
+  <link rel="stylesheet" href="styles.css">
+  <!-- Tailwind CSS CDN (perfect for learning modern styling fast) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 font-sans">
 
-<script>
-  window.DD_RUM.onReady(function() {
-    window.DD_RUM.init({
-      clientToken: 'pubf37d1eaf10aa80c1011f78f6e13c9108',
-      applicationId: 'e60e383f-31af-4e9b-af52-42a13a59f148',
-      site: 'datadoghq.com',
-      service: 'portfolio-website',
-      env: 'production',
-      version: '1.0.0',
-      sessionSampleRate: 100,
-      sessionReplaySampleRate: 20,
-      trackResources: true,
-      trackUserInteractions: true,
-      trackLongTasks: true
+  <!-- === REUSED HEADER FROM INDEX.HTML (keeps your site consistent) === -->
+  <header class="site-header" role="banner">
+    <div class="wrapper">
+      <a class="site-title" rel="author" href="/">Zach Simens' Software Portfolio</a>
+      <nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+        <div>
+          <label for="repos">Repositories</label>
+          <select id="repos" name="repos" onchange="openLink(this.value)">
+            <option value="">Select</option>
+            <option value="https://github.com/zsimens">GitHub</option>
+            <option value="https://gitlab.com/zsimens">GitLab</option>
+          </select>
+        </div>
+        <a href="/about.html">About</a>
+        <a href="/projects.html">Projects</a>
+        <a href="/prowess_demos.html">Prowess Demos!</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-6 py-12">
+    <div class="text-center mb-12">
+      <h1 class="text-5xl font-bold tracking-tight">Projects</h1>
+      <p class="mt-3 text-xl text-gray-600">Things I've built — from data viz to full-stack apps</p>
+    </div>
+
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <!-- Project cards (feel free to edit descriptions any time) -->
+
+      <div class="bg-white rounded-3xl shadow hover:shadow-2xl transition-all duration-300 overflow-hidden">
+        <div class="p-8">
+          <h3 class="text-2xl font-semibold mb-2">Inflation and Wages Over Time</h3>
+          <p class="text-gray-600 mb-6">Interactive visualization showing the relationship between inflation and real wages over decades.</p>
+          <div class="flex gap-2 flex-wrap">
+            <span class="text-xs font-medium px-4 py-1.5 bg-blue-100 text-blue-700 rounded-2xl">Data Viz</span>
+            <span class="text-xs font-medium px-4 py-1.5 bg-blue-100 text-blue-700 rounded-2xl">JavaScript</span>
+          </div>
+          <a href="/inflation_over_time.html" class="mt-8 inline-block w-full text-center py-4 bg-black text-white font-medium rounded-2xl hover:bg-gray-900 transition-colors">View Project →</a>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-3xl shadow hover:shadow-2xl transition-all duration-300 overflow-hidden">
+        <div class="p-8">
+          <h3 class="text-2xl font-semibold mb-2">Scrumptious</h3>
+          <p class="text-gray-600 mb-6">Recipe discovery web app with beautiful detail pages and search functionality.</p>
+          <div class="flex gap-2 flex-wrap">
+            <span class="text-xs font-medium px-4 py-1.5 bg-amber-100 text-amber-700 rounded-2xl">Frontend</span>
+            <span class="text-xs font-medium px-4 py-1.5 bg-amber-100 text-amber-700 rounded-2xl">HTML/CSS/JS</span>
+          </div>
+          <a href="https://zsimens.github.io/recipe-web-pages/detail.html" target="_blank" class="mt-8 inline-block w-full text-center py-4 bg-black text-white font-medium rounded-2xl hover:bg-gray-900 transition-colors">View Project →</a>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-3xl shadow hover:shadow-2xl transition-all duration-300 overflow-hidden">
+        <div class="p-8">
+          <h3 class="text-2xl font-semibold mb-2">Conference Go!</h3>
+          <p class="text-gray-600 mb-6">Conference management platform with scheduling, attendee tracking, and more.</p>
+          <div class="flex gap-2 flex-wrap">
+            <span class="text-xs font-medium px-4 py-1.5 bg-emerald-100 text-emerald-700 rounded-2xl">Full-Stack</span>
+          </div>
+          <a href="/conference_go.html" class="mt-8 inline-block w-full text-center py-4 bg-black text-white font-medium rounded-2xl hover:bg-gray-900 transition-colors">View Project →</a>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-3xl shadow hover:shadow-2xl transition-all duration-300 overflow-hidden">
+        <div class="p-8">
+          <h3 class="text-2xl font-semibold mb-2">CarCar</h3>
+          <p class="text-gray-600 mb-6">Automotive dealership inventory &amp; service management system.</p>
+          <div class="flex gap-2 flex-wrap">
+            <span class="text-xs font-medium px-4 py-1.5 bg-purple-100 text-purple-700 rounded-2xl">Bootcamp Capstone</span>
+          </div>
+          <a href="/carcar.html" class="mt-8 inline-block w-full text-center py-4 bg-black text-white font-medium rounded-2xl hover:bg-gray-900 transition-colors">View Project →</a>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-3xl shadow hover:shadow-2xl transition-all duration-300 overflow-hidden">
+        <div class="p-8">
+          <h3 class="text-2xl font-semibold mb-2">PostPUMP!</h3>
+          <p class="text-gray-600 mb-6">Fitness platform for post-workout nutrition and recovery tracking.</p>
+          <div class="flex gap-2 flex-wrap">
+            <span class="text-xs font-medium px-4 py-1.5 bg-red-100 text-red-700 rounded-2xl">Live Site</span>
+          </div>
+          <a href="https://www.postpump.fit" target="_blank" class="mt-8 inline-block w-full text-center py-4 bg-black text-white font-medium rounded-2xl hover:bg-gray-900 transition-colors">View Live Site →</a>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-3xl shadow hover:shadow-2xl transition-all duration-300 overflow-hidden">
+        <div class="p-8">
+          <h3 class="text-2xl font-semibold mb-2">Finca LaBrusca</h3>
+          <p class="text-gray-600 mb-6">Website for Finca LaBrusca — coffee farm and eco-lodge in Costa Rica.</p>
+          <div class="flex gap-2 flex-wrap">
+            <span class="text-xs font-medium px-4 py-1.5 bg-green-100 text-green-700 rounded-2xl">Live Site</span>
+          </div>
+          <a href="https://www.fincalabrusca.site" target="_blank" class="mt-8 inline-block w-full text-center py-4 bg-black text-white font-medium rounded-2xl hover:bg-gray-900 transition-colors">View Live Site →</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="mt-20 py-8 border-t text-center text-sm text-gray-500">
+    <h5>&copy; 2024 Zachary Simens</h5>
+  </footer>
+
+  <!-- === Your existing Datadog RUM script (kept exactly as-is) === -->
+  <script>
+    (function(h,o,u,n,d){h=h[d]=h[d]||{q:[],onReady:function(c){h.q.push(c)}};d=o.createElement(u);d.async=1;d.src=n;n=o.getElementsByTagName(u)[0];n.parentNode.insertBefore(d,n)})(window,document,'script','https://www.datadoghq-browser-agent.com/us1/v6/datadog-rum.js','DD_RUM')
+  </script>
+  <script>
+    window.DD_RUM.onReady(function() {
+      window.DD_RUM.init({
+        clientToken: 'pubf37d1eaf10aa80c1011f78f6e13c9108',
+        applicationId: 'e60e383f-31af-4e9b-af52-42a13a59f148',
+        site: 'datadoghq.com',
+        service: 'portfolio-website',
+        env: 'production',
+        version: '1.0.0',
+        sessionSampleRate: 100,
+        sessionReplaySampleRate: 20,
+        trackResources: true,
+        trackUserInteractions: true,
+        trackLongTasks: true
+      });
     });
-  });
-</script>
-<!-- === END DATADOG RUM === -->
-  </body>
+  </script>
+</body>
 </html>
