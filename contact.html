@@ -1,15 +1,111 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <link rel="icon" type="image/x-icon" href="/images/favicons/zakarya_araby.ico">
-    <title>K.I.T.</title>
-  </head>
-  <body>
-    <nav>
-      <h3>Coming Soon!</h3>
-    </nav>
-    <div>
-      <h1>Stay tuned! I'll be adding this in the next few days...</h1>
-    </div>
-  </body>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/x-icon" href="/images/favicons/zakarya_araby.ico">
+  <title>Contact • Zachary Simens</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; }
+  </style>
+</head>
+<body class="bg-zinc-950 text-zinc-100 min-h-screen">
+  <div class="max-w-2xl mx-auto pt-12 px-6">
+    <a href="/" class="inline-flex items-center text-zinc-400 hover:text-white mb-8">
+      ← Back to home
+    </a>
+
+    <h1 class="text-5xl font-bold mb-2">Let's talk</h1>
+    <p class="text-zinc-400 mb-10">Fill out the form and I'll get an enriched lead straight into my Apollo workspace.</p>
+
+    <form id="contactForm" class="space-y-6">
+      <div>
+        <label class="block text-sm mb-1">Your name</label>
+        <input type="text" id="name" required
+               class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 focus:outline-none focus:border-white">
+      </div>
+
+      <div>
+        <label class="block text-sm mb-1">Email address</label>
+        <input type="email" id="email" required
+               class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 focus:outline-none focus:border-white">
+      </div>
+
+      <div>
+        <label class="block text-sm mb-1">Company (optional)</label>
+        <input type="text" id="company"
+               class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 focus:outline-none focus:border-white">
+      </div>
+
+      <div>
+        <label class="block text-sm mb-1">Message / what you're looking for</label>
+        <textarea id="message" rows="4"
+                  class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 focus:outline-none focus:border-white"></textarea>
+      </div>
+
+      <button type="submit"
+              class="w-full bg-white text-black font-medium py-4 rounded-2xl hover:bg-zinc-200 transition flex items-center justify-center gap-2">
+        <span id="btnText">Send to Apollo</span>
+        <span id="spinner" class="hidden animate-spin h-4 w-4 border-2 border-black border-t-transparent rounded-full"></span>
+      </button>
+    </form>
+
+    <div id="result" class="mt-8 text-center hidden"></div>
+  </div>
+
+  <script>
+    const form = document.getElementById('contactForm');
+    const resultDiv = document.getElementById('result');
+    const btnText = document.getElementById('btnText');
+    const spinner = document.getElementById('spinner');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      btnText.classList.add('hidden');
+      spinner.classList.remove('hidden');
+
+      const data = {
+        name: document.getElementById('name').value,
+        email: document.getElementById('email').value,
+        company: document.getElementById('company').value,
+        message: document.getElementById('message').value
+      };
+
+      try {
+        const res = await fetch('/api/contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        const json = await res.json();
+
+        if (json.success) {
+          resultDiv.innerHTML = `
+            <div class="bg-green-900/30 border border-green-500 text-green-400 rounded-2xl p-6">
+              <p class="text-xl font-medium">${json.message}</p>
+              <p class="text-sm mt-2 text-green-300">Your contact was enriched and saved in Apollo.</p>
+            </div>
+          `;
+          resultDiv.classList.remove('hidden');
+          form.reset();
+        } else {
+          throw new Error(json.error || 'Something went wrong');
+        }
+      } catch (err) {
+        resultDiv.innerHTML = `
+          <div class="bg-red-900/30 border border-red-500 text-red-400 rounded-2xl p-6">
+            ${err.message}
+          </div>
+        `;
+        resultDiv.classList.remove('hidden');
+      } finally {
+        btnText.classList.remove('hidden');
+        spinner.classList.add('hidden');
+      }
+    });
+  </script>
+</body>
 </html>
