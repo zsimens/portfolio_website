@@ -16,7 +16,8 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Step 1: Enrich contact with Apollo (gets title, LinkedIn, company details, etc.)
+    // === YOUR ORIGINAL APOLLO FLOW (unchanged) ===
+    // Step 1: Enrich contact with Apollo
     const enrichRes = await fetch('https://api.apollo.io/api/v1/people/match', {
       method: 'POST',
       headers: {
@@ -33,7 +34,7 @@ export default async function handler(req, res) {
 
     const enrichData = await enrichRes.json();
 
-    // Step 2: Create (or update) the contact in your Apollo workspace
+    // Step 2: Create (or update) the contact in Apollo
     const createRes = await fetch('https://api.apollo.io/api/v1/contacts', {
       method: 'POST',
       headers: {
@@ -48,16 +49,38 @@ export default async function handler(req, res) {
         title: enrichData.title || undefined,
         label_names: ['Portfolio Inbound'],
         run_dedupe: true,
-        // merge all enriched fields
         ...enrichData,
       }),
     });
 
     const contactData = await createRes.json();
 
+    // === NEW: Silent Supabase backup + analytics ===
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (supabaseUrl && supabaseKey) {
+      await fetch(`${supabaseUrl}/rest/v1/contact_submissions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': supabaseKey,
+          'Authorization': `Bearer ${supabaseKey}`,
+          'Prefer': 'return=minimal',
+        },
+        body: JSON.stringify({
+          name: name.trim(),
+          email: email.trim(),
+          company: company ? company.trim() : null,
+          message: message ? message.trim() : null,
+          apollo_contact_id: contactData.contact?.id || null,
+        }),
+      }).catch(err => console.warn('Supabase backup failed (non-blocking):', err));
+    }
+
     return res.status(200).json({
       success: true,
-      message: '✅ Saved to Apollo!',
+      message: '✅ Saved to Apollo + Supabase backup!',
       contact_id: contactData.contact?.id,
     });
   } catch (err) {
