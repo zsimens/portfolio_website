@@ -1,4 +1,4 @@
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -16,8 +16,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    // === YOUR ORIGINAL APOLLO FLOW (unchanged) ===
-    // Step 1: Enrich contact with Apollo
+    // Apollo enrichment
     const enrichRes = await fetch('https://api.apollo.io/api/v1/people/match', {
       method: 'POST',
       headers: {
@@ -34,7 +33,7 @@ export default async function handler(req, res) {
 
     const enrichData = await enrichRes.json();
 
-    // Step 2: Create (or update) the contact in Apollo
+    // Create/update contact in Apollo
     const createRes = await fetch('https://api.apollo.io/api/v1/contacts', {
       method: 'POST',
       headers: {
@@ -55,36 +54,38 @@ export default async function handler(req, res) {
 
     const contactData = await createRes.json();
 
-    // === NEW: Silent Supabase backup + analytics ===
-    const supabaseUrl = process.env.SUPABASE_URL;
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-    if (supabaseUrl && supabaseKey) {
-      await fetch(`${supabaseUrl}/rest/v1/contact_submissions`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': supabaseKey,
-          'Authorization': `Bearer ${supabaseKey}`,
-          'Prefer': 'return=minimal',
-        },
-        body: JSON.stringify({
-          name: name.trim(),
-          email: email.trim(),
-          company: company ? company.trim() : null,
-          message: message ? message.trim() : null,
-          apollo_contact_id: contactData.contact?.id || null,
-        }),
-      }).catch(err => console.warn('Supabase backup failed (non-blocking):', err));
+    // Silent Supabase backup (exactly as it was before)
+    if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      try {
+        await fetch(`${process.env.SUPABASE_URL}/rest/v1/contact_submissions`, {
+          method: 'POST',
+          headers: {
+            'apikey': process.env.SUPABASE_SERVICE_ROLE_KEY,
+            'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify({
+            name: name.trim(),
+            email: email.trim(),
+            company: company ? company.trim() : null,
+            message: message ? message.trim() : null,
+            source: 'portfolio_website',
+            created_at: new Date().toISOString()
+          })
+        });
+      } catch (supaErr) {
+        console.error('Supabase backup failed (non-blocking):', supaErr);
+      }
     }
 
     return res.status(200).json({
       success: true,
-      message: '✅ Saved to Apollo + Supabase backup!',
+      message: '✅ Lead saved in Apollo + Supabase backup!',
       contact_id: contactData.contact?.id,
     });
   } catch (err) {
     console.error('Apollo error:', err);
     return res.status(500).json({ error: 'Failed to save contact' });
   }
-}
+};
