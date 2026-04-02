@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pi Network - Mine & Pay Demo | Zach's Portfolio</title>
+    <link rel="stylesheet" href="styles.css"> <!-- Your existing global styles -->
+    <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+    <style>
+        .pi-section { max-width: 800px; margin: 40px auto; padding: 30px; background: #f8f9fa; border-radius: 12px; text-align: center; }
+        .demo-btn { background: #4CAF50; color: white; padding: 18px 36px; font-size: 20px; border: none; border-radius: 8px; cursor: pointer; margin: 20px; }
+        .demo-btn:hover { background: #45a049; }
+        .status { margin: 20px; padding: 15px; border-radius: 8px; background: #e8f5e9; display: none; }
+    </style>
+</head>
+<body>
+    <nav style="text-align:center; margin:20px;">
+        <a href="index.html">← Home</a> | 
+        <a href="projects.html">Projects</a> | 
+        <a href="resume.html">Resume</a> | 
+        <a href="prowess_demos.html">Demos</a>
+    </nav>
+
+    <h1 style="text-align:center;">Pi Network Demo</h1>
+
+    <!-- Mining Referral Section -->
+    <div class="pi-section">
+        <h2>🚀 Mine Pi With Me (Free!)</h2>
+        <p>Join my team and start earning Pi coins daily — completely free. Use my referral link:</p>
+        <p style="font-size:1.4em; font-weight:bold; color:#2196F3;">
+            https://minepi.com/<strong>YOUR_PI_USERNAME</strong>
+        </p>
+        <p><em>Replace YOUR_PI_USERNAME with your actual Pi username (get it from the Pi app → Profile → Invite friends)</em></p>
+        <a href="https://minepi.com/YOUR_PI_USERNAME" target="_blank" style="background:#2196F3;color:white;padding:12px 24px;text-decoration:none;border-radius:8px;font-size:18px;">
+            Join My Mining Team Now
+        </a>
+    </div>
+
+    <!-- Payment Demo Section -->
+    <div class="pi-section">
+        <h2>💰 Pay with Pi — Live Demo (Sandbox Mode)</h2>
+        <p>Click below to test a real Pi payment flow. Nothing is charged — this is 100% sandbox.</p>
+        <button class="demo-btn" onclick="makeDemoPayment()">Pay 1 Pi (Demo Purchase)</button>
+        
+        <div id="status" class="status"></div>
+    </div>
+
+    <div style="text-align:center; margin:40px; font-size:0.9em; color:#666;">
+        <strong>How to test:</strong> Open this page in the official <strong>Pi Browser</strong> (or Pi app on mobile). 
+        First-time? Register your site as a test app at the Pi Developer Portal (sandbox mode).
+    </div>
+
+    <script>
+        // Initialize Pi SDK (sandbox = demo only)
+        async function initPi() {
+            try {
+                await Pi.init({ version: "2.0", sandbox: true });
+                console.log("Pi SDK ready in sandbox mode");
+            } catch (e) {
+                console.log("Pi SDK ready (open in Pi Browser for full demo)");
+            }
+        }
+
+        async function makeDemoPayment() {
+            const status = document.getElementById('status');
+            status.style.display = 'block';
+            status.innerHTML = '🔄 Initiating payment...';
+
+            try {
+                const payment = await Pi.createPayment({
+                    amount: 1,
+                    memo: "Portfolio Demo Purchase",
+                    metadata: { orderId: "demo-" + Date.now(), item: "Pi Page Access" }
+                }, {
+                    onReadyForServerApproval: (paymentId) => {
+                        status.innerHTML = `✅ Payment ID: ${paymentId}<br><small>In a real app, your backend would approve here.</small>`;
+                        console.log('Ready for approval:', paymentId);
+                    },
+                    onReadyForServerCompletion: (paymentId, txid) => {
+                        status.innerHTML = `🎉 Payment complete! Bexeir be! <br>Transaction ID: ${txid}`;
+                        console.log('Completed:', txid);
+                    },
+                    onCancel: () => { status.innerHTML = '❌ Payment cancelled by user'; },
+                    onError: (error) => { status.innerHTML = `❌ Error: ${error}`; }
+                });
+            } catch (err) {
+                status.innerHTML = `❌ Failed to start: ${err.message}`;
+            }
+        }
+
+        // Auto-init on page load
+        window.onload = initPi;
+    </script>
+</body>
+</html>
