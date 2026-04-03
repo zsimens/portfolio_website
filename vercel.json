@@ -1,8 +1,8 @@
 {
-  "builds": [
-    {
-      "src": "api/**/*.js",
-      "use": "@vercel/node"
+  "trailingSlash": false,
+  "functions": {
+    "api/**/*.js": {
+      "runtime": "nodejs20.x"
     }
-  ]
+  }
 }
