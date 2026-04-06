@@ -4,18 +4,201 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Fireflies AI Meeting Insights • Demo</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="style.css"> <!-- your existing stylesheet -->
   <style>
-    /* Add any extra styling here if needed - matches your dark theme */
-    .demo-container { max-width: 900px; margin: 40px auto; padding: 20px; }
+    body { background: #0f172a; color: #e2e8f0; }
+    .dropzone { transition: all 0.3s ease; }
+    .dropzone.dragover { background: #1e2937; border-color: #22d3ee; }
   </style>
 </head>
-<body>
-  <h1>Fireflies AI Meeting Insights Demo</h1>
-  <p>Upload a meeting recording or try the sample — see real AI transcription + smart summary!</p>
+<body class="min-h-screen font-sans">
+  <div class="max-w-4xl mx-auto p-8">
+    <h1 class="text-4xl font-bold mb-2 text-center">Fireflies AI Meeting Insights</h1>
+    <p class="text-center text-slate-400 mb-10">Upload a meeting recording → get instant transcript + AI summary + action items</p>
 
-  <!-- Upload area and results will go here — I'll give you the full interactive JS in the next message if you want me to expand this now -->
+    <!-- Upload Area -->
+    <div id="upload-area" class="dropzone border-2 border-dashed border-slate-600 rounded-3xl p-12 text-center cursor-pointer hover:border-cyan-400">
+      <input type="file" id="file-input" accept="audio/*" class="hidden">
+      <div class="mx-auto w-16 h-16 bg-cyan-500/10 rounded-2xl flex items-center justify-center mb-4">
+        🎤
+      </div>
+      <p class="text-xl font-medium mb-1">Drop your audio file here</p>
+      <p class="text-slate-400">or click to browse • Supports mp3, wav, m4a</p>
+    </div>
 
-  <p><strong>Ready to add this page?</strong> Just reply **"Generate the full demo page HTML + JS"** and I’ll give you the complete, beautiful frontend with drag-and-drop upload, sample audio, loading states, and polished results display.</p>
+    <!-- Sample Button -->
+    <div class="text-center mt-6">
+      <button id="sample-btn" 
+              class="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-700 px-6 py-3 rounded-2xl text-sm font-medium transition">
+        ▶️ Try sample meeting audio
+      </button>
+    </div>
+
+    <!-- Status -->
+    <div id="status" class="hidden mt-8 text-center text-sm font-medium"></div>
+
+    <!-- Results -->
+    <div id="results" class="hidden mt-10 space-y-10">
+      <div class="bg-slate-900 rounded-3xl p-8">
+        <h2 class="text-2xl font-semibold mb-4">Transcript</h2>
+        <div id="transcript" class="prose prose-invert max-w-none text-slate-300"></div>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-8">
+        <div class="bg-slate-900 rounded-3xl p-8">
+          <h2 class="text-2xl font-semibold mb-4">AI Summary</h2>
+          <div id="summary" class="text-slate-300"></div>
+        </div>
+
+        <div class="bg-slate-900 rounded-3xl p-8">
+          <h2 class="text-2xl font-semibold mb-4">Action Items</h2>
+          <ul id="action-items" class="space-y-3 text-slate-300"></ul>
+        </div>
+      </div>
+
+      <div class="bg-slate-900 rounded-3xl p-8">
+        <h2 class="text-2xl font-semibold mb-4">Key Topics</h2>
+        <div id="topics" class="flex flex-wrap gap-2"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const uploadArea = document.getElementById('upload-area');
+    const fileInput = document.getElementById('file-input');
+    const sampleBtn = document.getElementById('sample-btn');
+    const statusEl = document.getElementById('status');
+    const resultsEl = document.getElementById('results');
+    const transcriptEl = document.getElementById('transcript');
+    const summaryEl = document.getElementById('summary');
+    const actionItemsEl = document.getElementById('action-items');
+    const topicsEl = document.getElementById('topics');
+
+    // Tailwind script already loaded
+    function showStatus(text, isLoading = false) {
+      statusEl.classList.remove('hidden');
+      statusEl.innerHTML = isLoading 
+        ? `<span class="animate-pulse">${text}</span>` 
+        : text;
+    }
+
+    function hideStatus() {
+      statusEl.classList.add('hidden');
+    }
+
+    async function uploadFile(file) {
+      showStatus('Uploading to Fireflies...', true);
+
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('fileName', file.name);
+      formData.append('fileType', file.type);
+
+      const res = await fetch('/api/fireflies-upload', {
+        method: 'POST',
+        body: formData
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Upload failed');
+
+      return data.transcriptId;
+    }
+
+    async function getTranscript(id) {
+      showStatus('Processing with AI...', true);
+
+      const res = await fetch(`/api/fireflies-transcript?id=${id}`);
+      const transcript = await res.json();
+      if (!res.ok) throw new Error(transcript.error || 'Failed to get transcript');
+
+      return transcript;
+    }
+
+    function renderResults(transcript) {
+      hideStatus();
+      resultsEl.classList.remove('hidden');
+
+      // Transcript
+      transcriptEl.innerHTML = transcript.transcript 
+        ? `<p class="whitespace-pre-wrap">${transcript.transcript}</p>` 
+        : '<p class="text-slate-400">No transcript available yet.</p>';
+
+      // Summary
+      summaryEl.innerHTML = transcript.summary 
+        ? `<p class="whitespace-pre-wrap">${transcript.summary}</p>` 
+        : '<p class="text-slate-400">No summary yet.</p>';
+
+      // Action Items
+      actionItemsEl.innerHTML = transcript.actionItems && transcript.actionItems.length
+        ? transcript.actionItems.map(item => `<li class="flex gap-3"><span class="text-cyan-400">→</span> ${item}</li>`).join('')
+        : '<li class="text-slate-400">No action items detected.</li>';
+
+      // Topics
+      topicsEl.innerHTML = transcript.topics && transcript.topics.length
+        ? transcript.topics.map(topic => 
+            `<span class="px-4 py-2 bg-slate-800 text-cyan-300 rounded-2xl text-sm">${topic}</span>`
+          ).join('')
+        : '<span class="text-slate-400">No topics detected.</span>';
+    }
+
+    // Drag & Drop + Click handlers
+    uploadArea.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', async (e) => {
+      if (e.target.files.length === 0) return;
+      const file = e.target.files[0];
+      try {
+        const id = await uploadFile(file);
+        const transcript = await getTranscript(id);
+        renderResults(transcript);
+      } catch (err) {
+        hideStatus();
+        alert('Error: ' + err.message);
+      }
+    });
+
+    // Drag events
+    uploadArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadArea.classList.add('dragover');
+    });
+    uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
+    uploadArea.addEventListener('drop', async (e) => {
+      e.preventDefault();
+      uploadArea.classList.remove('dragover');
+      if (e.dataTransfer.files.length === 0) return;
+      const file = e.dataTransfer.files[0];
+      try {
+        const id = await uploadFile(file);
+        const transcript = await getTranscript(id);
+        renderResults(transcript);
+      } catch (err) {
+        hideStatus();
+        alert('Error: ' + err.message);
+      }
+    });
+
+    // Sample button (you can replace the URL with any public audio if you prefer)
+    sampleBtn.addEventListener('click', async () => {
+      showStatus('Loading sample meeting...', true);
+      try {
+        // Public short sample meeting audio (you can swap this URL)
+        const sampleUrl = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
+        const res = await fetch(sampleUrl);
+        const blob = await res.blob();
+        const file = new File([blob], 'sample-meeting.mp3', { type: 'audio/mpeg' });
+        
+        const id = await uploadFile(file);
+        const transcript = await getTranscript(id);
+        renderResults(transcript);
+      } catch (err) {
+        hideStatus();
+        alert('Sample failed: ' + err.message);
+      }
+    });
+
+    console.log('%c✅ Fireflies Demo ready!', 'color:#22d3ee; font-size:13px');
+  </script>
 </body>
 </html>
