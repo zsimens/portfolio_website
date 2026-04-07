@@ -13,7 +13,7 @@ module.exports = async function handler(req, res) {
   const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!supabaseUrl || !supabaseKey) {
-    console.error('Supabase env vars missing in Vercel');
+    console.error('Supabase env vars missing');
     return res.status(500).json({ error: 'Server configuration error' });
   }
 
@@ -37,14 +37,12 @@ module.exports = async function handler(req, res) {
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Supabase insert failed:', errorText);
       throw new Error('Failed to save message');
     }
 
     return res.status(200).json({
       success: true,
-      message: 'Message received! Thank you.'
+      message: '✅ Message received! Thank you.'
     });
   } catch (err) {
     console.error('Contact form error:', err);
